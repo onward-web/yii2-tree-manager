@@ -80,18 +80,19 @@ class NodeController extends Controller
      */
     public function actionSave()
     {
-        $post = Yii::$app->request->post(); 
-        
-       
-        
+        $post = Yii::$app->request->post();
         static::checkValidRequest(!isset($post['treeNodeModify']));
         $treeNodeModify = $parentKey = $currUrl = null;
-        $modelClass = $post['modelClass'];
+        //$modelClass = '\kartik\tree\models\Tree';
         extract(static::getPostData());
         $module = TreeView::module();
         $keyAttr = $module->dataStructure['keyAttribute'];
         $session = Yii::$app->session;
-        
+        /**
+         * @var Tree $modelClass
+         * @var Tree $node
+         * @var Tree $parent
+         */
         if ($treeNodeModify) {
             $node = new $modelClass;
             $successMsg = Yii::t('kvtree', 'The node was successfully created.');
@@ -108,25 +109,26 @@ class NodeController extends Controller
         $isNewRecord = $node->isNewRecord;
         $node->load($post);
         if ($treeNodeModify) {
-            if ($parentKey == 'root') {                
+            if ($parentKey == 'root') {
                 $node->makeRoot();
             } else {
                 $parent = $modelClass::findOne($parentKey);
+                
+                echo '<pre>';
+                print_r($parent);
+                echo '</pre>';
+                
                 $node->appendTo($parent);
             }
         }
-     
         $errors = $success = false;
         
-        
-       
-        foreach (Yii::$app->request->post($post['translationAttribute'], []) as $language => $data) {
+        foreach (Yii::$app->request->post($post['translationPostAttribute'], []) as $language => $data) {
             foreach ($data as $attribute => $translation) {
                 $node->translate($language)->$attribute = $translation;
             }
         }       
         
-                
         if ($node->save()) {
             // check if active status was changed
             if (!$isNewRecord && $node->activeOrig != $node->active) {
@@ -158,7 +160,7 @@ class NodeController extends Controller
         } else {
             $session->setFlash('error', $errorMsg);
         }
-        return $this->redirect($currUrl);  
+        return $this->redirect($currUrl);
     }
 
     /**
@@ -168,10 +170,11 @@ class NodeController extends Controller
      */
     public function actionManage()
     {
-         Yii::$app->response->format = Response::FORMAT_JSON;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+       
         static::checkValidRequest();
         $parentKey = $action = null;
-        $modelClass = Yii::$app->request->post()['modelClass'];
+        //$modelClass = '\kartik\tree\models\Tree';
         $isAdmin = $softDelete = $showFormButtons = $showIDAttribute = false;
         $currUrl = $nodeView = $formOptions = $formAction = $breadCrumbs = $nodeSelected = '';
         $iconsList = $nodeAddlViews = [];
@@ -187,11 +190,9 @@ class NodeController extends Controller
             $node = $modelClass::findOne($id);
         }
         
-       
         
         $translationModelClass = $node->getBehavior('multilingual')->translationModelClass;
-        
-        $translationAttribute = (new \ReflectionClass($translationModelClass))->getShortName();
+        $translationPostAttribute = (new \ReflectionClass($translationModelClass))->getShortName();
         
         
         $module = TreeView::module();
@@ -201,7 +202,7 @@ class NodeController extends Controller
                 'action' => $formAction,
                 'formOptions' => empty($formOptions) ? [] : $formOptions,
                 'modelClass' => $modelClass,
-                'translationAttribute' => $translationAttribute,
+                'translationPostAttribute' => $translationPostAttribute,              
                 'currUrl' => $currUrl,
                 'isAdmin' => $isAdmin,
                 'iconsList' => $iconsList,
@@ -220,7 +221,6 @@ class NodeController extends Controller
                 }
             });
         }
-        
         $callback = function () use ($nodeView, $params) {
             return $this->renderAjax($nodeView, ['params' => $params]);
         };
@@ -243,7 +243,7 @@ class NodeController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         static::checkValidRequest();
         $id = null;
-        $class = Yii::$app->request->post()['class'];
+        $class = '\kartik\tree\models\Tree';
         $softDelete = false;
         extract(static::getPostData());
         $node = $class::findOne($id);
@@ -262,8 +262,7 @@ class NodeController extends Controller
      */
     public function actionMove()
     {
-		
-        /**
+	/**
          * @var Tree $class
          * @var Tree $nodeFrom
          * @var Tree $nodeTo
@@ -273,7 +272,7 @@ class NodeController extends Controller
         $dir = null;
         $idFrom = null;
         $idTo = null;
-        $class = Yii::$app->request->post()['class'];
+        $class = '\kartik\tree\models\Tree';
         $allowNewRoots = false;
         extract(static::getPostData());
         $nodeFrom = $class::findOne($idFrom);
@@ -299,15 +298,6 @@ class NodeController extends Controller
                 } elseif ($dir == 'r') {
                     $nodeFrom->appendTo($nodeTo);
                 }
-                
-                foreach (Yii::$app->request->post('BlogCategoryDescription', []) as $language => $data) {
-                    foreach ($data as $attribute => $translation) {
-                        $nodeFrom->translate($language)->$attribute = $translation;
-                    }
-                }       
-                
-                
-                
                 return $nodeFrom->save();
             }
             return true;

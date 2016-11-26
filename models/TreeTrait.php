@@ -5,7 +5,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
-use onwardWeb\tree\TreeView;
+use kartik\tree\TreeView;
 use kartik\tree\models\TreeQuery;
 //use creocoder\nestedsets\NestedSetsBehavior;
 

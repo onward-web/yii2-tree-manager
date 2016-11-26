@@ -1233,11 +1233,15 @@ HTML;
         if ($this->_iconsList !== false) {
             $node->$iconTypeAttribute = ArrayHelper::getValue($this->iconEditSettings, 'type', self::ICON_CSS);
         }
+        $translationModelClass = $node->getBehavior('multilingual')->translationModelClass;
+        $translationPostAttribute = (new \ReflectionClass($translationModelClass))->getShortName();
+        
         $params = $this->_module->treeStructure + $this->_module->dataStructure + [
                 'node' => $node,
                 'action' => $this->nodeActions[Module::NODE_SAVE],
                 'formOptions' => $this->nodeFormOptions,
                 'modelClass' => $modelClass,
+                'translationPostAttribute' => $translationPostAttribute,              
                 'currUrl' => Yii::$app->request->url,
                 'isAdmin' => $this->isAdmin,
                 'iconsList' => $this->_iconsList,
