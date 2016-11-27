@@ -114,10 +114,6 @@ class NodeController extends Controller
             } else {
                 $parent = $modelClass::findOne($parentKey);
                 
-                echo '<pre>';
-                print_r($parent);
-                echo '</pre>';
-                
                 $node->appendTo($parent);
             }
         }
