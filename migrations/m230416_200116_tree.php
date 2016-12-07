@@ -7,6 +7,8 @@
  * @see http://demos.krajee.com/tree-manager
  */
 
+namespace kartik\tree\migrations;
+
 use yii\db\Migration;
 
 /**

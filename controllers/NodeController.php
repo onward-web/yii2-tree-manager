@@ -83,7 +83,7 @@ class NodeController extends Controller
         $post = Yii::$app->request->post();
         static::checkValidRequest(!isset($post['treeNodeModify']));
         $treeNodeModify = $parentKey = $currUrl = null;
-        //$modelClass = '\kartik\tree\models\Tree';
+        $modelClass = '\kartik\tree\models\Tree';
         extract(static::getPostData());
         $module = TreeView::module();
         $keyAttr = $module->dataStructure['keyAttribute'];
@@ -113,26 +113,10 @@ class NodeController extends Controller
                 $node->makeRoot();
             } else {
                 $parent = $modelClass::findOne($parentKey);
-                
                 $node->appendTo($parent);
             }
         }
         $errors = $success = false;
-        
-        foreach (Yii::$app->request->post($post['translationPostAttribute'], []) as $language => $data) {
-            foreach ($data as $attribute => $translation) {
-                $node->translate($language)->$attribute = $translation;
-            }
-        }
-        
-        foreach (Yii::$app->request->post('UrlRoute', []) as $language => $data) {
-            foreach ($data as $attribute => $path) {                    
-                $node->getPath($language)->$attribute = $path;
-            }
-        }
-        
-        
-        
         if ($node->save()) {
             // check if active status was changed
             if (!$isNewRecord && $node->activeOrig != $node->active) {
@@ -175,10 +159,9 @@ class NodeController extends Controller
     public function actionManage()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
-       
         static::checkValidRequest();
         $parentKey = $action = null;
-        //$modelClass = '\kartik\tree\models\Tree';
+        $modelClass = '\kartik\tree\models\Tree';
         $isAdmin = $softDelete = $showFormButtons = $showIDAttribute = false;
         $currUrl = $nodeView = $formOptions = $formAction = $breadCrumbs = $nodeSelected = '';
         $iconsList = $nodeAddlViews = [];
@@ -193,12 +176,6 @@ class NodeController extends Controller
         } else {
             $node = $modelClass::findOne($id);
         }
-        
-        
-        $translationModelClass = $node->getBehavior('multilingual')->translationModelClass;
-        $translationPostAttribute = (new \ReflectionClass($translationModelClass))->getShortName();
-        
-        
         $module = TreeView::module();
         $params = $module->treeStructure + $module->dataStructure + [
                 'node' => $node,
@@ -206,7 +183,6 @@ class NodeController extends Controller
                 'action' => $formAction,
                 'formOptions' => empty($formOptions) ? [] : $formOptions,
                 'modelClass' => $modelClass,
-                'translationPostAttribute' => $translationPostAttribute,              
                 'currUrl' => $currUrl,
                 'isAdmin' => $isAdmin,
                 'iconsList' => $iconsList,
@@ -266,7 +242,7 @@ class NodeController extends Controller
      */
     public function actionMove()
     {
-	/**
+        /**
          * @var Tree $class
          * @var Tree $nodeFrom
          * @var Tree $nodeTo
@@ -283,7 +259,7 @@ class NodeController extends Controller
         $nodeTo = $class::findOne($idTo);
         $isMovable = $nodeFrom->isMovable($dir);
         $errorMsg = $isMovable ? Yii::t('kvtree', 'Error while moving the node. Please try again later.') :
-        Yii::t('kvtree', 'The selected node cannot be moved.');
+            Yii::t('kvtree', 'The selected node cannot be moved.');
         $callback = function () use ($dir, $nodeFrom, $nodeTo, $allowNewRoots, $isMovable) {
             if (!empty($nodeFrom) && !empty($nodeTo)) {
                 if (!$isMovable) {
