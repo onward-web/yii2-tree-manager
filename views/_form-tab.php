@@ -50,9 +50,19 @@ $form->field($model, $attributePrefix.'is_published')
             )
         ?>
     </div>
+    
+    <div class="col-md-12">
+        <?=
+            $form->field($modelPath, $attributePrefix.'path');           
+        ?>
+    </div>
+    
+    
+    
     <div class="col-md-12">
         <?= $form->field($model, $attributePrefix.'h1') ?>
     </div>
+    
     <div class="col-md-12">
         <?= $form->field($model, $attributePrefix.'meta_title') ?>
               

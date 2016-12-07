@@ -123,7 +123,15 @@ class NodeController extends Controller
             foreach ($data as $attribute => $translation) {
                 $node->translate($language)->$attribute = $translation;
             }
-        }       
+        }
+        
+        foreach (Yii::$app->request->post('UrlRoute', []) as $language => $data) {
+            foreach ($data as $attribute => $path) {                    
+                $node->getPath($language)->$attribute = $path;
+            }
+        }
+        
+        
         
         if ($node->save()) {
             // check if active status was changed

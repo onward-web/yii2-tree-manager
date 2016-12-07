@@ -190,7 +190,7 @@ echo $renderContent(Module::VIEW_PART_1);
 ?>
 
 <?=
-    onwardWeb\Multilingual\widgets\MultilingualFormTabs::widget([
+    DevGroup\Multilingual\widgets\MultilingualFormTabs::widget([
         'model' => $node,
         'modelPath' => $node,
         
