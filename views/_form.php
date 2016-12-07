@@ -91,9 +91,10 @@ if ($node->isReadonly()) {
 if ($node->isDisabled()) {
     $inputOpts['disabled'] = true;
 }
+/*
 if ($node->isLeaf()) {
     $flagOptions['disabled'] = true;
-}
+}*/
 
 // show alert helper
 $showAlert = function ($type, $body = '', $hide = true) {
@@ -126,6 +127,8 @@ $renderContent = function ($part) use ($nodeAddlViews, $params, $form) {
 <?= Html::hiddenInput('currUrl', $currUrl) ?>
 <?= Html::hiddenInput('modelClass', $modelClass) ?>
 <?= Html::hiddenInput('nodeSelected', $nodeSelected) ?>
+<?= Html::hiddenInput('translationPostAttribute', $translationPostAttribute) ?>
+
 
 <?php
 /**
@@ -183,16 +186,28 @@ echo $renderContent(Module::VIEW_PART_1);
 /**
  * SECTION 6: Basic node attributes for editing.
  */
+
 ?>
+
+<?=
+    DevGroup\Multilingual\widgets\MultilingualFormTabs::widget([
+        'model' => $node,
+        'modelPath' => $node,
+        
+        'childView' => __DIR__ . DIRECTORY_SEPARATOR . '_form-tab.php',
+        'form' => $form,
+    ])
+?>
+
+
 <?php if ($iconsList == 'text' || $iconsList == 'none'): ?>
     <?php if ($showIDAttribute): ?>
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-12">
                 <?= $keyField ?>
             </div>
-            <div class="col-sm-8">
-                <?= $form->field($node, $nameAttribute)->textInput($inputOpts) ?>
-            </div>
+            
+           
         </div>
     <?php else: ?>
         <?= $keyField ?>
@@ -216,7 +231,8 @@ echo $renderContent(Module::VIEW_PART_1);
         <div class="col-sm-6">
             <?= $keyField ?>
             <?= Html::activeHiddenInput($node, $iconTypeAttribute) ?>
-            <?= $form->field($node, $nameAttribute)->textArea(['rows' => 3] + $inputOpts) ?>
+            <?php //$form->field($node, $nameAttribute)->textArea(['rows' => 3] + $inputOpts) 
+            ?>
         </div>
         <div class="col-sm-6">
             <?= /** @noinspection PhpUndefinedMethodInspection */

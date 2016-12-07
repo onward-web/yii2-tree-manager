@@ -1,11 +1,4 @@
 <?php
-
-/**
- * @copyright Copyright &copy; Kartik Visweswaran, Krajee.com, 2015 - 2016
- * @package   yii2-tree-manager
- * @version   1.0.6
- */
-
 namespace kartik\tree\models;
 
 use Yii;
@@ -13,14 +6,13 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
 use kartik\tree\TreeView;
-use creocoder\nestedsets\NestedSetsBehavior;
+use kartik\tree\models\TreeQuery;
+//use creocoder\nestedsets\NestedSetsBehavior;
 
-/**
- * Trait that must be used by the Tree model
- */
-trait TreeTrait
-{
-    /**
+
+trait TreeTrait {
+    
+      /**
      * @var array the list of boolean value attributes
      */
     public static $boolAttribs = [
@@ -52,21 +44,55 @@ trait TreeTrait
     /**
      * @inheritdoc
      */
-    public static function tableName()
-    {
-        return ''; // ensure you return a valid table name in your extended class
-    }
+    //public static function tableName()
+    //{
+    //    return static::tableName; // ensure you return a valid table name in your extended class
+    //}
 
     /**
      * @inheritdoc
      */
+    
     public static function find()
     {
-        /** @noinspection PhpUndefinedFieldInspection */
+        // @var ActiveQuery $query 
+        $query = Yii::createObject(isset(self::$treeQueryClass) ? self::$treeQueryClass : TreeQuery::classname(), [get_called_class()]);
+        $query = $query
+            ->innerJoinWith(['defaultTranslation']);
+
+        if (method_exists(get_called_class(), 'applyDefaultScope')) {
+            $query = call_user_func([get_called_class(), 'applyDefaultScope'], $query);
+        } else {
+            // @var ActiveRecord|MultilingualActiveRecord $modelInstance 
+            $modelInstance = new self;
+            if ($modelInstance->translationPublishedAttribute !== false) {
+                // @var ActiveRecord $translationModelClassName 
+                $translationModelClassName = $modelInstance->getTranslationModelClassName();
+                self::$translationTableName = $translationModelClassName::tableName();
+                // add condition on
+                $where = [
+                    self::$translationTableName . '.' . $modelInstance->translationPublishedAttribute =>
+                        $modelInstance->translationPublishedAttributeValue
+                ];
+                unset($modelInstance);
+                $query = $query->where($where);
+            }
+        }
+        return $query;
+        
+        // @noinspection PhpUndefinedFieldInspection 
+      
+    }
+    
+    /*
+      public static function find()
+    {
+        /// @noinspection PhpUndefinedFieldInspection //
         $treeQuery = isset(self::$treeQueryClass) ? self::$treeQueryClass : TreeQuery::classname();
         return new $treeQuery(get_called_class());
     }
-
+    */
+    
     /**
      * @inheritdoc
      */
@@ -75,17 +101,13 @@ trait TreeTrait
         /** @noinspection PhpUndefinedFieldInspection */
         $treeQuery = isset(self::$treeQueryClass) ? self::$treeQueryClass : TreeQuery::classname();
         return new $treeQuery(['modelClass' => get_called_class()]);
+       
     }
 
     /**
      * @inheritdoc
      */
-    public function behaviors()
-    {
-        $module = TreeView::module();
-        $settings = ['class' => NestedSetsBehavior::className()] + $module->treeStructure;
-        return empty($module->treeBehaviorName) ? [$settings] : [$module->treeBehaviorName => $settings];
-    }
+    
 
     /**
      * @inheritdoc
@@ -111,9 +133,10 @@ trait TreeTrait
         extract($module->dataStructure);
         $attribs = array_merge([$nameAttribute, $iconAttribute, $iconTypeAttribute], static::$boolAttribs);
         $rules = [
-            [[$nameAttribute], 'required'],
+            //[[$nameAttribute], 'required'],
             [$attribs, 'safe']
         ];
+        /*
         if ($this->encodeNodeNames) {
             $rules[] = [
                 $nameAttribute,
@@ -122,7 +145,7 @@ trait TreeTrait
                     return Html::encode($value);
                 }
             ];
-        }
+        }*/
         if ($this->purifyNodeIcons) {
             $rules[] = [
                 $iconAttribute,
@@ -451,3 +474,4 @@ trait TreeTrait
         return implode($glue, $crumbs);
     }
 }
+

@@ -68,13 +68,13 @@
             self.$input.html(self.caret + out);
 
         },
-        listen: function () {
+        listen: function () {           
             var self = this;
             self.$dropdown.on('click', function (e) {
                 e.stopPropagation();
-            });
+            });            
             self.$element.on('treeview.change', function (event, keys, desc) {
-                self.setInput(desc.split(','));
+                self.setInput(desc.split(','));                
                 if (self.autoCloseOnSelect) {
                     self.$input.closest('.kv-tree-dropdown-container').removeClass('open');
                 }
