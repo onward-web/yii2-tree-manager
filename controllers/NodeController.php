@@ -126,7 +126,11 @@ class NodeController extends Controller
         }
         
         foreach (Yii::$app->request->post('UrlRoute', []) as $language => $data) {
-            foreach ($data as $attribute => $path) {                    
+            foreach ($data as $attribute => $path) {  
+                if(empty($path)){
+                    $path = $node->buildPaths($language);
+                }
+                
                 $node->getPath($language)->$attribute = $path;
             }
         }
